@@ -44,9 +44,42 @@ It uses a ~~H2 in-memory database~~ sqlite database (for easy local test without
 
 # Getting started
 
-You'll need Java 11 installed.
+## Prerequisites
 
-    ./gradlew bootRun
+You'll need **Java 17** installed. This project has been upgraded from Java 11 to Java 17.
+
+### Java 17 Installation (macOS)
+
+1. **Install OpenJDK 17 via Homebrew:**
+   ```bash
+   brew install openjdk@17
+   ```
+
+2. **Create system symlink:**
+   ```bash
+   sudo ln -sfn /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+   ```
+
+3. **Set JAVA_HOME environment variable:**
+   ```bash
+   export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+   ```
+   
+   For permanent setup, add to your `~/.zshrc` or `~/.bash_profile`:
+   ```bash
+   export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+   export PATH="$JAVA_HOME/bin:$PATH"
+   ```
+
+4. **Verify installation:**
+   ```bash
+   java -version
+   # Should output: openjdk version "17.0.16" or similar
+   ```
+
+## Running the Application
+
+    JAVA_HOME=$(/usr/libexec/java_home -v 17) ./gradlew bootRun
 
 To test that it works, open a browser tab at http://localhost:8080/tags .  
 Alternatively, you can run
@@ -68,13 +101,39 @@ The entry point address of the backend API is at http://localhost:8080, **not** 
 
 The repository contains a lot of test cases to cover both api test and repository test.
 
-    ./gradlew test
+    JAVA_HOME=$(/usr/libexec/java_home -v 17) ./gradlew test
 
 # Code format
 
 Use spotless for code format.
 
-    ./gradlew spotlessJavaApply
+    JAVA_HOME=$(/usr/libexec/java_home -v 17) ./gradlew spotlessJavaApply
+
+## IDE Configuration
+
+### IntelliJ IDEA
+1. Open **File > Project Structure**
+2. Under **Project Settings > Project**, set:
+   - **Project SDK**: 17 (java version "17.0.16")
+   - **Project language level**: 17
+3. Under **Platform Settings > SDKs**, ensure Java 17 is configured
+4. **File > Settings > Build, Execution, Deployment > Build Tools > Gradle**
+   - Set **Gradle JVM** to Java 17
+
+### VS Code
+1. Install the **Extension Pack for Java**
+2. Open **Command Palette** (Cmd+Shift+P)
+3. Run **Java: Configure Java Runtime**
+4. Set the project JDK to Java 17
+
+## Troubleshooting
+
+### Common Issues
+- **Gradle Daemon Issues**: Run `./gradlew --stop` then retry your build command
+- **IDE Project Reimport**: 
+  - IntelliJ: **File > Reload Gradle Project**
+  - VS Code: **Command Palette > Java: Reload Projects**
+- **Code Formatting Violations**: Run `./gradlew spotlessApply`
 
 # Help
 
