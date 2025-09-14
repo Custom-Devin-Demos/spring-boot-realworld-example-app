@@ -153,6 +153,24 @@ This document tracks key architectural and implementation decisions made during 
 - Manual testing only (rejected due to error-prone nature)
 - Single version testing (rejected due to insufficient validation)
 
+## Decision 009: Build Tool Version Strategy
+**Date**: 2025-09-14
+**Status**: Accepted
+**Context**: Need to balance Java version support with plugin compatibility
+**Decision**: Use Gradle 7.6.4 for initial migration phases (Java 11, 17), defer Java 21 support
+**Rationale**:
+- Gradle 7.6.4 provides stable Java 17 support
+- Current plugins (Spotless 6.2.1, DGS CodeGen 5.0.6) have compatibility issues with Gradle 8.x
+- Gradle 8.5+ required for Java 21 support but introduces plugin breaking changes
+**Consequences**:
+- Java 21 CI testing deferred as future enhancement
+- Migration can proceed safely through Java 17
+- Plugin upgrades required before Java 21 support
+**Alternatives Considered**:
+- Force upgrade to Gradle 8.x (rejected due to plugin compatibility issues)
+- Downgrade plugins (rejected due to feature requirements)
+- Skip Java 17 testing (rejected due to validation needs)
+
 ---
 
 ## Future Decisions

@@ -12,9 +12,25 @@ This document provides a comprehensive assessment of migration touchpoints for u
 - **JJWT**: 0.11.2
 - **Joda Time**: 2.10.13
 - **SQLite JDBC**: 3.36.0.3
+- **Build Tool**: Gradle 7.6.4
 
 ## Migration Path
 Java 11 → Java 17 → Java 21 → Java 24
+
+### Current Support Status
+| Java Version | CI Testing | Status | Notes |
+|--------------|------------|--------|-------|
+| Java 11 | ✅ Passing | Fully Supported | Current baseline |
+| Java 17 | ✅ Passing | Fully Supported | Ready for migration |
+| Java 21 | ❌ Deferred | Future Enhancement | Requires Gradle 8.5+ and plugin updates |
+| Java 24 | ❌ Deferred | Future Enhancement | Long-term target |
+
+### Build Tool Constraints
+- **Current**: Gradle 7.6.4 supports Java 11-19
+- **Java 21 Limitation**: Requires Gradle 8.5+ but current plugins have compatibility issues:
+  - Spotless 6.2.1 has task dependency validation issues with Gradle 8.x
+  - DGS CodeGen 5.0.6 may require updates for Gradle 8.x compatibility
+- **Future Work**: Plugin upgrades needed before Java 21 support can be enabled
 
 ## Critical Migration Touchpoints
 
