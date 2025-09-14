@@ -13,33 +13,40 @@ public class SecurityMigrationTest {
 
   @Test
   public void testSecurityFilterChainConfiguration() {
-    assertDoesNotThrow(() -> {
-      assertTrue(true, "SecurityFilterChain configuration approach is valid for migration");
-    });
+    assertDoesNotThrow(
+        () -> {
+          assertTrue(true, "SecurityFilterChain configuration approach is valid for migration");
+        });
   }
 
   @Test
   public void testSecurityFilterChainBeanConfiguration() {
-    assertDoesNotThrow(() -> {
-      assertTrue(true, "SecurityFilterChain bean configuration replaces WebSecurityConfigurerAdapter");
-    });
+    assertDoesNotThrow(
+        () -> {
+          assertTrue(
+              true, "SecurityFilterChain bean configuration replaces WebSecurityConfigurerAdapter");
+        });
   }
 
   @Test
   public void testSpringSecurityApiAvailability() {
-    assertDoesNotThrow(() -> {
-      Class.forName("org.springframework.security.web.SecurityFilterChain");
-      Class.forName("org.springframework.security.config.annotation.web.builders.HttpSecurity");
-      Class.forName("org.springframework.security.config.http.SessionCreationPolicy");
-    }, "Spring Security classes required for SecurityFilterChain should be available");
+    assertDoesNotThrow(
+        () -> {
+          Class.forName("org.springframework.security.web.SecurityFilterChain");
+          Class.forName("org.springframework.security.config.annotation.web.builders.HttpSecurity");
+          Class.forName("org.springframework.security.config.http.SessionCreationPolicy");
+        },
+        "Spring Security classes required for SecurityFilterChain should be available");
   }
 
   @Test
   public void testHttpMethodEnumAvailability() {
-    assertDoesNotThrow(() -> {
-      HttpMethod.GET.name();
-      HttpMethod.POST.name();
-      HttpMethod.OPTIONS.name();
-    }, "HttpMethod enum should be available for security configuration");
+    assertDoesNotThrow(
+        () -> {
+          HttpMethod.GET.name();
+          HttpMethod.POST.name();
+          HttpMethod.OPTIONS.name();
+        },
+        "HttpMethod enum should be available for security configuration");
   }
 }
