@@ -1,0 +1,207 @@
+name: Migration Validation
+
+on:
+  push:
+    branches: [ master, 'devin/DEV-22-*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run javax imports analysis
+      run: |
+        chmod +x scripts/analyze-javax-imports.sh
+        ./scripts/analyze-javax-imports.sh || true
+        
+    - name: Upload javax analysis results
+      uses: actions/upload-artifact@v3
+      with:
+        name: javax-imports-analysis
+        path: javax-imports-analysis.txt
+
+  multi-version-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [11, 17, 21]
+      fail-fast: false
+      
+    name: Test Java ${{ matrix.java-version }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build with Gradle
+      run: ./gradlew build -x test
+      
+    - name: Run unit tests
+      run: ./gradlew test
+      
+    - name: Run migration validation tests
+      run: ./gradlew migrationTest
+      
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-java-${{ matrix.java-version }}
+        path: |
+          build/reports/tests/
+          build/test-results/
+
+  performance-baseline:
+    runs-on: ubuntu-latest
+    needs: [multi-version-test]
+    if: matrix.java-version == 11
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Build application
+      run: ./gradlew build -x test
+      
+    - name: Start application for performance testing
+      run: |
+        ./gradlew bootRun &
+        APP_PID=$!
+        echo "APP_PID=$APP_PID" >> $GITHUB_ENV
+        
+        # Wait for application to start
+        timeout=60
+        while [ $timeout -gt 0 ]; do
+          if curl -f http://localhost:8080/tags > /dev/null 2>&1; then
+            echo "Application started successfully"
+            break
+          fi
+          sleep 2
+          timeout=$((timeout - 2))
+        done
+        
+        if [ $timeout -le 0 ]; then
+          echo "Application failed to start within timeout"
+          exit 1
+        fi
+        
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+        
+    - name: Run performance baseline with k6
+      run: |
+        chmod +x scripts/performance/load-test.js
+        k6 run scripts/performance/load-test.js --out json=performance-results.json
+        
+    - name: Run database performance baseline
+      run: |
+        chmod +x scripts/performance/db-operations.sh
+        ./scripts/performance/db-operations.sh
+        
+    - name: Stop application
+      run: |
+        if [ ! -z "$APP_PID" ]; then
+          kill $APP_PID || true
+        fi
+        
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-baseline
+        path: |
+          performance-results.json
+          db-performance-baseline.txt
+
+  migration-validation-summary:
+    runs-on: ubuntu-latest
+    needs: [static-analysis, multi-version-test, performance-baseline]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      
+    - name: Generate migration validation summary
+      run: |
+        echo "# Migration Validation Summary" > migration-summary.md
+        echo "" >> migration-summary.md
+        echo "## Java Version Compatibility" >> migration-summary.md
+        
+        if [ -d "test-results-java-11" ]; then
+          echo "- ✅ Java 11: Tests passed" >> migration-summary.md
+        else
+          echo "- ❌ Java 11: Tests failed" >> migration-summary.md
+        fi
+        
+        if [ -d "test-results-java-17" ]; then
+          echo "- ✅ Java 17: Tests passed" >> migration-summary.md
+        else
+          echo "- ❌ Java 17: Tests failed" >> migration-summary.md
+        fi
+        
+        if [ -d "test-results-java-21" ]; then
+          echo "- ✅ Java 21: Tests passed" >> migration-summary.md
+        else
+          echo "- ❌ Java 21: Tests failed" >> migration-summary.md
+        fi
+        
+        echo "" >> migration-summary.md
+        echo "## Static Analysis Results" >> migration-summary.md
+        if [ -f "javax-imports-analysis/javax-imports-analysis.txt" ]; then
+          echo "javax.* imports analysis completed. See artifact for details." >> migration-summary.md
+        fi
+        
+        echo "" >> migration-summary.md
+        echo "## Performance Baseline" >> migration-summary.md
+        if [ -f "performance-baseline/performance-results.json" ]; then
+          echo "Performance baseline established. See artifacts for detailed metrics." >> migration-summary.md
+        fi
+        
+        cat migration-summary.md
+        
+    - name: Upload migration summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: migration-validation-summary
+        path: migration-summary.md

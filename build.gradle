@@ -60,6 +60,37 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+sourceSets {
+    migrationTest {
+        java {
+            srcDir 'src/migrationTest/java'
+        }
+        resources {
+            srcDir 'src/migrationTest/resources'
+        }
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    migrationTestImplementation.extendsFrom testImplementation
+    migrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    migrationTestImplementation 'org.openjdk.jmh:jmh-core:1.36'
+    migrationTestImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+}
+
+task migrationTest(type: Test) {
+    description = 'Runs migration validation tests'
+    group = 'verification'
+    testClassesDirs = sourceSets.migrationTest.output.classesDirs
+    classpath = sourceSets.migrationTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
 tasks.named('clean') {
     doFirst {
         delete './dev.db'

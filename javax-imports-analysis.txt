@@ -1,0 +1,77 @@
+=== javax.* Import Analysis for Java Migration ===
+Generated on: Sun Sep 14 22:04:38 UTC 2025
+Project: Spring Boot RealWorld Example App
+
+SUMMARY
+=======
+Total javax.* imports found: 42
+  - Validation imports (javax.validation.*): 34
+  - Servlet imports (javax.servlet.*): 4
+  - Crypto imports (javax.crypto.*): 4
+  - Other javax imports: 0
+
+VALIDATION IMPORTS (javax.validation.* -> jakarta.validation.*)
+================================================================
+src/main/java/io/spring/graphql/exception/GraphQLCustomizeExceptionHandler.java:20:import javax.validation.ConstraintViolation;
+src/main/java/io/spring/graphql/exception/GraphQLCustomizeExceptionHandler.java:21:import javax.validation.ConstraintViolationException;
+src/main/java/io/spring/graphql/UserMutation.java:21:import javax.validation.ConstraintViolationException;
+src/main/java/io/spring/api/CurrentUserApi.java:12:import javax.validation.Valid;
+src/main/java/io/spring/api/CommentsApi.java:17:import javax.validation.Valid;
+src/main/java/io/spring/api/CommentsApi.java:18:import javax.validation.constraints.NotBlank;
+src/main/java/io/spring/api/exception/CustomizeExceptionHandler.java:10:import javax.validation.ConstraintViolation;
+src/main/java/io/spring/api/exception/CustomizeExceptionHandler.java:11:import javax.validation.ConstraintViolationException;
+src/main/java/io/spring/api/ArticlesApi.java:10:import javax.validation.Valid;
+src/main/java/io/spring/api/UsersApi.java:18:import javax.validation.Valid;
+src/main/java/io/spring/api/UsersApi.java:19:import javax.validation.constraints.Email;
+src/main/java/io/spring/api/UsersApi.java:20:import javax.validation.constraints.NotBlank;
+src/main/java/io/spring/api/ArticleApi.java:15:import javax.validation.Valid;
+src/main/java/io/spring/application/user/UserService.java:7:import javax.validation.Constraint;
+src/main/java/io/spring/application/user/UserService.java:8:import javax.validation.ConstraintValidator;
+src/main/java/io/spring/application/user/UserService.java:9:import javax.validation.ConstraintValidatorContext;
+src/main/java/io/spring/application/user/UserService.java:10:import javax.validation.Valid;
+src/main/java/io/spring/application/user/UpdateUserParam.java:4:import javax.validation.constraints.Email;
+src/main/java/io/spring/application/user/DuplicatedEmailConstraint.java:5:import javax.validation.Constraint;
+src/main/java/io/spring/application/user/DuplicatedEmailConstraint.java:6:import javax.validation.Payload;
+src/main/java/io/spring/application/user/DuplicatedUsernameConstraint.java:5:import javax.validation.Constraint;
+src/main/java/io/spring/application/user/DuplicatedUsernameConstraint.java:6:import javax.validation.Payload;
+src/main/java/io/spring/application/user/RegisterParam.java:4:import javax.validation.constraints.Email;
+src/main/java/io/spring/application/user/RegisterParam.java:5:import javax.validation.constraints.NotBlank;
+src/main/java/io/spring/application/user/DuplicatedEmailValidator.java:4:import javax.validation.ConstraintValidator;
+src/main/java/io/spring/application/user/DuplicatedEmailValidator.java:5:import javax.validation.ConstraintValidatorContext;
+src/main/java/io/spring/application/user/DuplicatedUsernameValidator.java:4:import javax.validation.ConstraintValidator;
+src/main/java/io/spring/application/user/DuplicatedUsernameValidator.java:5:import javax.validation.ConstraintValidatorContext;
+src/main/java/io/spring/application/article/DuplicatedArticleValidator.java:5:import javax.validation.ConstraintValidator;
+src/main/java/io/spring/application/article/DuplicatedArticleValidator.java:6:import javax.validation.ConstraintValidatorContext;
+src/main/java/io/spring/application/article/DuplicatedArticleConstraint.java:8:import javax.validation.Constraint;
+src/main/java/io/spring/application/article/DuplicatedArticleConstraint.java:9:import javax.validation.Payload;
+src/main/java/io/spring/application/article/ArticleCommandService.java:6:import javax.validation.Valid;
+src/main/java/io/spring/application/article/NewArticleParam.java:5:import javax.validation.constraints.NotBlank;
+
+SERVLET IMPORTS (javax.servlet.* -> jakarta.servlet.*)
+======================================================
+src/main/java/io/spring/api/security/JwtTokenFilter.java:8:import javax.servlet.FilterChain;
+src/main/java/io/spring/api/security/JwtTokenFilter.java:9:import javax.servlet.ServletException;
+src/main/java/io/spring/api/security/JwtTokenFilter.java:10:import javax.servlet.http.HttpServletRequest;
+src/main/java/io/spring/api/security/JwtTokenFilter.java:11:import javax.servlet.http.HttpServletResponse;
+
+CRYPTO IMPORTS (javax.crypto.* -> jakarta.crypto.*)
+===================================================
+src/main/java/io/spring/infrastructure/service/DefaultJwtService.java:11:import javax.crypto.SecretKey;
+src/main/java/io/spring/infrastructure/service/DefaultJwtService.java:12:import javax.crypto.spec.SecretKeySpec;
+src/migrationTest/java/io/spring/migration/JwtPerformanceBenchmark.java:10:import javax.crypto.SecretKey;
+src/migrationTest/java/io/spring/migration/DependencyCompatibilityTest.java:12:import javax.crypto.SecretKey;
+
+MIGRATION RECOMMENDATIONS
+=========================
+1. javax.validation.* -> jakarta.validation.*
+   - Update @Valid, @NotBlank, @Email, @NotNull annotations
+   - Update ConstraintViolation and ConstraintViolationException
+
+2. javax.servlet.* -> jakarta.servlet.*
+   - Update FilterChain, ServletException, HttpServletRequest, HttpServletResponse
+   - Critical for security filter functionality
+
+3. javax.crypto.* -> jakarta.crypto.*
+   - Update SecretKey, SecretKeySpec for JWT functionality
+   - Test JWT operations thoroughly after migration
+
