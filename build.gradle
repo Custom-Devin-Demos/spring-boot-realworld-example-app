@@ -3,7 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id "com.netflix.dgs.codegen" version "5.0.6"
-    id "com.diffplug.spotless" version "6.2.1"
+    id "com.diffplug.spotless" version "6.25.0"
 }
 
 version = '0.0.1-SNAPSHOT'
@@ -58,6 +58,37 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+sourceSets {
+    migrationTest {
+        java {
+            srcDir 'src/migrationTest/java'
+        }
+        resources {
+            srcDir 'src/migrationTest/resources'
+        }
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    migrationTestImplementation.extendsFrom testImplementation
+    migrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    migrationTestImplementation 'org.openjdk.jmh:jmh-core:1.36'
+    migrationTestImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+}
+
+task migrationTest(type: Test) {
+    description = 'Runs migration validation tests'
+    group = 'verification'
+    testClassesDirs = sourceSets.migrationTest.output.classesDirs
+    classpath = sourceSets.migrationTest.runtimeClasspath
+    useJUnitPlatform()
 }
 
 tasks.named('clean') {
